@@ -5,6 +5,7 @@ import logging
 
 from odoo import api, fields, models
 from odoo.exceptions import AccessError
+from odoo.fields import Domain
 from odoo.tools.safe_eval import safe_eval, time
 
 _logger = logging.getLogger(__name__)
@@ -85,9 +86,8 @@ class ReportAction(models.Model):
             return res
         report_obj = self.env["ir.actions.report"]
         qwebtypes = ["csv"]
-        conditions = [
-            ("report_type", "in", qwebtypes),
-            ("report_name", "=", report_name),
-        ]
+        conditions = Domain("report_type", "in", qwebtypes) & Domain(
+            "report_name", "=", report_name
+        )
         context = self.env["res.users"].context_get()
         return report_obj.with_context(**context).search(conditions, limit=1)

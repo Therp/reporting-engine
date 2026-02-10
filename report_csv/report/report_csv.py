@@ -50,7 +50,7 @@ class ReportCSVAbstract(models.AbstractModel):
         encoding = self._context.get("encoding")
         if not encoding:
             return file_data.read(), "csv"
-        error_handling = self._context.get("encode_error_handling")
+        error_handling = self.env.context.get("encode_error_handling")
         if error_handling:
             return file_data.read().encode(encoding, errors=error_handling), "csv"
         try:
