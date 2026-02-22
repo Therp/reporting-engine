@@ -4,7 +4,7 @@
 import logging
 from io import StringIO
 
-from odoo import _, models
+from odoo import models
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -21,8 +21,9 @@ class ReportCSVAbstract(models.AbstractModel):
 
     def _get_objs_for_report(self, docids, data):
         """
-        Returns objects for csv report.  From WebUI these
-        are either as docids taken from context.active_ids or
+        Return objects for csv report.
+
+        From WebUI these are either as docids taken from context.active_ids or
         in the case of wizard are in data.  Manual calls may rely
         on regular context, setting docids, or setting data.
 
@@ -47,7 +48,7 @@ class ReportCSVAbstract(models.AbstractModel):
         file = csv.DictWriter(file_data, **self.csv_report_options())
         self.generate_csv_report(file, data, objs)
         file_data.seek(0)
-        encoding = self._context.get("encoding")
+        encoding = self.env.context.get("encoding")
         if not encoding:
             return file_data.read(), "csv"
         error_handling = self.env.context.get("encode_error_handling")
@@ -57,11 +58,15 @@ class ReportCSVAbstract(models.AbstractModel):
             return file_data.read().encode(encoding), "csv"
         except Exception as e:
             raise UserError(
-                _("Failed to encode the data with the encoding set in the report.")
+                self.env._(
+                    "Failed to encode the data with the encoding set in the report."
+                )
             ) from e
 
     def csv_report_options(self):
         """
+        CSV report options.
+
         :return: dictionary of parameters. At least return 'fieldnames', but
         you can optionally return parameters that define the export format.
         Valid parameters include 'delimiter', 'quotechar', 'escapechar',
